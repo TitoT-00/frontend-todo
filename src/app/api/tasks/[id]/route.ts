@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { taskStore } from '@/lib/taskStore';
 
-// PUT /api/tasks/:id - Update a task
+// PUT /tasks/:id - Update a task
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -51,7 +51,7 @@ export async function PUT(
   }
 }
 
-// DELETE /api/tasks/:id - Delete a task
+// DELETE /tasks/:id - Delete a task
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

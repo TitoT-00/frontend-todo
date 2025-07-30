@@ -48,7 +48,7 @@ yarn dev
 
 ### Backend Setup
 
-This Todo App is configured to work with a separate backend server running on port 3002. Make sure your backend server is running and accessible at http://localhost:3001 with the following endpoints:
+This Todo App is configured to work with a separate backend server running on port 3001. Make sure your backend server is running and accessible at http://localhost:3001 with the following endpoints:
 
 - `GET /tasks` - Retrieve all tasks
 - `POST /tasks` - Create a new task
