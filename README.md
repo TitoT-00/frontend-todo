@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Todo App
+
+A modern, feature-rich Todo application built with Next.js, featuring a clean UI with dark theme and blue accent colors. This app helps you organize your tasks with color coding, completion tracking, and a user-friendly interface.
+
+## Features
+
+- **Clean, Modern UI**: Dark theme with blue accent colors and the Inter font family
+- **Task Management**: Create, edit, and delete tasks easily
+- **Color Coding**: Assign different colors to tasks for visual organization
+- **Completed Tasks Tab**: Track your progress with a dedicated tab for completed tasks
+- **Dynamic Checkboxes**: Checkbox colors match the task's selected color
+- **Visual Feedback**: Empty states with helpful messages and icons
+- **Responsive Design**: Works well on various screen sizes
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 14.x or later
+- npm or yarn package manager
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone <repository-url>
+cd frontend-todo
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Start the development server:
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Backend Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This Todo App is configured to work with a separate backend server running on port 3002. Make sure your backend server is running and accessible at http://localhost:3001 with the following endpoints:
 
-## Learn More
+- `GET /tasks` - Retrieve all tasks
+- `POST /tasks` - Create a new task
+- `PUT /tasks/:id` - Update an existing task
+- `DELETE /tasks/:id` - Delete a task
 
-To learn more about Next.js, take a look at the following resources:
+## Key Features Explained
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Color-Coded Tasks
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+When creating or editing a task, you can select from multiple colors. The selected color is used for:
+- The checkbox outline when the task is not completed
+- The checkbox fill when the task is completed
+- Visual identification of tasks in the list
 
-## Deploy on Vercel
+### Task Management
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Create Task**: Click the "+ Create task" button to add a new task
+- **Edit Task**: Click the edit icon (pencil) next to any task to modify its title or color
+- **Delete Task**: Click the trash icon to remove a task
+- **Complete Task**: Click the checkbox to mark a task as completed
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Tabs Navigation
+
+- **Tasks Tab**: Shows all tasks with completed tasks crossed out
+- **Completed Tab**: Shows your completion ratio (e.g., "2 of 5") and lists only completed tasks
+
+## Technologies Used
+
+- **Next.js**: React framework for the frontend
+- **Tailwind CSS**: For styling
+- **Material-UI Icons**: For UI icons
+- **Inter Font**: For typography (weight 400, 700, and 900)
+- **SVG Assets**: Custom icons for enhanced visual appeal
+

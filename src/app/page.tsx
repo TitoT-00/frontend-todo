@@ -1,103 +1,256 @@
-import Image from "next/image";
+'use client';
+import ControlPointIcon from '@mui/icons-material/ControlPoint';
+import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
+import Header from '@/components/Header';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { fetchTasks, createTask, toggleTaskCompletion, deleteTask as deleteTaskAPI, Task, checkBackendAvailability } from '@/lib/api';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import EditIcon from '@mui/icons-material/Edit';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const router = useRouter();
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [activeTab, setActiveTab] = useState<'tasks' | 'completed'>('tasks');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const activeTasks = tasks.filter(task => !task.completed);
+  const completedTasks = tasks.filter(task => task.completed);
+
+  // Fetch tasks on component mount
+  useEffect(() => {
+    loadTasks();
+    
+  }, []);
+
+  const loadTasks = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const fetchedTasks = await fetchTasks();
+      setTasks(fetchedTasks);
+    } catch (err) {
+      setError('Failed to load tasks');
+      console.error('Error loading tasks:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const toggleTask = async (id: number) => {
+    try {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        const updatedTask = await toggleTaskCompletion(id, !task.completed);
+        setTasks(tasks.map(t => t.id === id ? updatedTask : t));
+      }
+    } catch (err) {
+      setError('Failed to update task');
+      console.error('Error updating task:', err);
+    }
+  };
+
+  const handleDeleteTask = async (id: number) => {
+    try {
+      await deleteTaskAPI(id);
+      setTasks(tasks.filter(task => task.id !== id));
+    } catch (err) {
+      setError('Failed to delete task');
+      console.error('Error deleting task:', err);
+    }
+  };
+
+  return (
+    <main className="min-h-screen bg-[#1A1A1A] text-white">
+      {/* Header */}
+      <Header />
+
+      {/* Overlapping Button */}
+      <div className="w-full flex justify-center -mt-6 z-10 relative">
+        <button 
+          onClick={() => router.push('/add-task')}
+          className="bg-[#1E6F9F] hover:bg-blue-700 text-white font-semibold shadow-lg flex items-center justify-center gap-2"
+          style={{
+            width: "736px",
+            borderRadius: "8px",
+            padding: "16px",
+            height: "52px",
+          }}
+        >
+          Create Task
+          <ControlPointIcon style={{ fontSize: 20 }} />
+        </button>
+      </div>
+
+      {/* Body Section */}
+      <div className="max-w-3xl mx-auto mt-8 text-center">
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-500 bg-opacity-20 border border-red-500 text-red-200 px-4 py-2 rounded-lg mb-4">
+            {error}
+            <button 
+              onClick={() => setError(null)}
+              className="ml-2 text-red-300 hover:text-red-100"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
+        {/* Tabs */}
+        <div className="flex justify-between items-center border-b border-zinc-700 pb-2 mb-8 px-2 text-sm">
+          <button
+            onClick={() => setActiveTab('tasks')}
+            className={`font-semibold flex items-center gap-2 ${
+              activeTab === 'tasks' ? '' : 'text-gray-400 hover:text-gray-300'
+            }`}
+            style={activeTab === 'tasks' ? { color: '#4EA8DE' } : {}}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Tasks 
+            <span className="bg-zinc-700 text-white px-2 py-0.5 rounded-full">
+              {tasks.length}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('completed')}
+            className={`font-semibold flex items-center gap-2 ${
+              activeTab === 'completed' ? '' : 'text-gray-400 hover:text-gray-300'
+            }`}
+            style={activeTab === 'completed' ? { color: '#5E60CE' } : {}}
           >
-            Read our docs
-          </a>
+            Completed 
+            <span className="bg-zinc-700 text-white px-2 py-0.5 rounded-full">
+              {completedTasks.length}{tasks.length > 0 ? ` of ${tasks.length}` : ''}
+            </span>
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center text-zinc-400 mt-20">
+            <div className="text-4xl mb-4">⏳</div>
+            <p className="font-medium">Loading tasks...</p>
+          </div>
+        ) : (
+          /* Task List or Empty State */
+          activeTab === 'tasks' ? (
+            tasks.length === 0 ? (
+              <div className="flex flex-col items-center justify-center text-zinc-400 mt-20">
+                <div className="mb-4">
+                  <Image src="/clipboard.svg" width={48} height={48} alt="Clipboard" />
+                </div>
+                <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: '16px' }}>You don't have any tasks registered yet.</p>
+                <p className="mt-2" style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: '16px' }}>Create tasks and organize your to-do items.</p>
+              </div>
+            ) : (
+              <div className="space-y-3 text-left">
+                {tasks.map((task) => (
+                <div
+                  key={task.id}
+                  className="bg-[#262626] border border-zinc-700 rounded-lg p-4 flex items-center gap-3 hover:bg-zinc-700 transition-colors"
+                >
+                
+                  <button
+                    onClick={() => toggleTask(task.id)}
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                      task.completed
+                        ? `bg-${task.color} border-${task.color} text-white`
+                        : `hover:border-${task.color}`
+                    }`}
+                    style={task.completed 
+                      ? { backgroundColor: task.color, borderColor: task.color } 
+                      : { borderColor: task.color }
+                    }
+                  >
+                    {task.completed && '✓'}
+                  </button>
+                  <span className={`flex-1 ${
+                    task.completed ? 'text-gray-500 line-through' : 'text-white'
+                  }`}>
+                    {task.title}
+                  </span>
+                  <button
+                    onClick={() => router.push(`/add-task?id=${task.id}&title=${encodeURIComponent(task.title)}&color=${encodeURIComponent(task.color)}&edit=true`)}
+                    className="text-gray-500 hover:text-blue-400 transition-colors p-1 mr-2"
+                  >
+                    <EditIcon fontSize="small" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTask(task.id)}
+                    className="text-gray-500 hover:text-red-400 transition-colors p-1"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+            </div>
+            )
+          ) : (
+            /* Completed Tab - Show completion summary */
+            completedTasks.length === 0 ? (
+              <div className="flex flex-col items-center justify-center text-zinc-400 mt-20">
+                <div className="mb-4">
+                  <Image src="/clipboard.svg" width={48} height={48} alt="Clipboard" />
+                </div>
+                <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: '16px' }}>No completed tasks yet.</p>
+                <p className="mt-2" style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: '16px' }}>Complete some tasks to see them here.</p>
+              </div>
+            ) : (
+              <div className="text-center">
+                <CheckCircleIcon 
+                  style={{ fontSize: 80, color: '#4ADE80' }} 
+                  className="mb-4"
+                />
+                <p className="text-2xl font-semibold text-green-400 mb-2">
+                  {completedTasks.length} of {tasks.length} tasks completed!
+                </p>
+                <p className="text-gray-400 mb-8">
+                  {Math.round((completedTasks.length / tasks.length) * 100)}% progress
+                </p>
+                <div className="space-y-3 text-left">
+                  {completedTasks.map((task) => (
+                    <div
+                      key={task.id}
+                      className="bg-[#262626] border border-zinc-700 rounded-lg p-4 flex items-center gap-3 hover:bg-zinc-700 transition-colors"
+                    >
+                      <div 
+                        className="w-4 h-4 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: task.color }}
+                      />
+                      <button
+                        onClick={() => toggleTask(task.id)}
+                        className="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors text-white"
+                        style={{ backgroundColor: task.color, borderColor: task.color }}
+                      >
+                        ✓
+                      </button>
+                      <span className="flex-1 text-gray-500 line-through">
+                        {task.title}
+                      </span>
+                      <button
+                        onClick={() => router.push(`/add-task?id=${task.id}&title=${encodeURIComponent(task.title)}&color=${encodeURIComponent(task.color)}&edit=true`)}
+                        className="text-gray-500 hover:text-blue-400 transition-colors p-1 mr-2"
+                      >
+                        <EditIcon fontSize="small" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTask(task.id)}
+                        className="text-gray-500 hover:text-red-400 transition-colors p-1"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          )
+        )}
+      </div>
+    </main>
   );
 }
